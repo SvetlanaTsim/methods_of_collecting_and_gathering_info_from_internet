@@ -5,6 +5,7 @@ import pymongo
 from pprint import pprint
 from pymongo.errors import *
 from time import sleep
+import hashlib
 
 
 class JobScrapper:
@@ -203,7 +204,10 @@ class JobScrapper:
         for i in data:
             data_for_hash = str(i['vacancy_name']) + str(i['company']) + str(i['city']) + str(i['salary_min']) + str(i['salary_max']) + \
                             str(i['currency']) + str(i['vacancy_link']) + str(i['site'])
-            i['_id'] = hash(data_for_hash)
+            data_bytes = data_for_hash.encode('utf-8')
+            hash_object = hashlib.sha1(data_bytes)
+            hex_dig = hash_object.hexdigest()
+            i['_id'] = hex_dig
         return data
 
     """Метод вставляет вакансии в базу данных"""
@@ -214,7 +218,7 @@ class JobScrapper:
                 self.collection.insert_one(vacancy)
             except DuplicateKeyError as e:
                 print(e)
-                print('--> ', vacancy['id'], vacancy['vacancy_name'], vacancy['company'], 'was duplicated')
+                print('--> ', vacancy['_id'], vacancy['vacancy_name'], vacancy['company'], 'was duplicated')
         print('All vacancies successfully inserted!')
 
     """Метод для поиска вакансий с зп больше указанной"""
@@ -225,7 +229,6 @@ class JobScrapper:
             pprint(vacancy)
 
 
-a = JobScrapper('py_vacancies', 'hh_sj_python', 'python')
-#pprint(a.superjob_parser())
+a = JobScrapper('py_job', 'hh_sj_python', 'python')
 a.insert_vacancies_to_database()
 a.find_vacancies_with_salary(150000)
