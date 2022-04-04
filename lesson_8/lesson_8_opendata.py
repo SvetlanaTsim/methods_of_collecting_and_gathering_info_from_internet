@@ -22,7 +22,7 @@ class OpenDataScrapper:
 
     '''method gets data from url and extracts from zip archive'''
     def get_data_from_url(self):
-        response = requests.get('https://op.mos.ru/EHDWSREST/catalog/export/get?id=1306339')
+        response = requests.get(self.url)
         file = tempfile.TemporaryFile()
         file.write(response.content)
         fzip = zipfile.ZipFile(file)
